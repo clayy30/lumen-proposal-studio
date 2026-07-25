@@ -1,0 +1,130 @@
+[
+  {
+    "id": 62854,
+    "name": "Demo Solar Co.",
+    "sales_phone_number": "(800) 555-0199",
+    "company_website": "https://example.com",
+    "color_highlight": "#1B4F72",
+    "country_iso2": "US",
+    "projects": [
+      {
+        "id": 99001,
+        "identifier": "imported-opensolar-1",
+        "address": "220 Coastal Highway",
+        "locality": "Tybee Island",
+        "state": "GA",
+        "zip": "31328",
+        "country_iso2": "US",
+        "lat": 32.0002,
+        "lon": -80.8456,
+        "stage": 2,
+        "created_date": "2026-07-01T10:00:00Z",
+        "modified_date": "2026-07-11T10:00:00Z",
+        "valid_until_date": "2026-08-01",
+        "contacts": [
+          {
+            "id": 501,
+            "display": "Sarah Nguyen",
+            "full_name": "Sarah Nguyen",
+            "first_name": "Sarah",
+            "family_name": "Nguyen",
+            "email": "sarah.n@email.com",
+            "phone": "(912) 555-0166"
+          }
+        ],
+        "assigned_team_member": {
+          "id": 10,
+          "display": "Alex Rivera",
+          "email": "alex@demosolar.example",
+          "schedule_meeting_url": "#",
+          "schedule_meeting_label": "Schedule a call"
+        },
+        "usage_annual_or_guess": 11000,
+        "proposal_data": {
+          "colors": {
+            "textColor": "#1a1a1a",
+            "highlightColor": "#1B4F72"
+          },
+          "address_over_two_lines": ["220 Coastal Highway", "Tybee Island, GA 31328"],
+          "proposal_message": "Based on your usage and roof geometry, this system is sized for near-full offset with room for future EV charging.",
+          "systems": [
+            {
+              "title": "System 1 (8.40 kW)",
+              "name": "System 1",
+              "has_battery": false,
+              "battery_total_kwh": 0,
+              "systemKwStc": "8.400",
+              "systemOutputAnnualkWh": "11,240",
+              "systemPaybackYear": "6.1",
+              "systemNetPresentValue": "$36,800",
+              "systemIrr": "13.5",
+              "systemReturnOnInvestment": "205",
+              "panelOrientations": "21 panels facing South at 18°",
+              "systemPanelPlacement": "21 x REC Alpha Pure 400 (portrait)",
+              "moduleCodes": "REC Alpha Pure 400",
+              "inverterCodes": "Enphase IQ8+",
+              "batteryCodes": "",
+              "output_monthly_json": "[640,700,880,1040,1160,1220,1260,1180,1040,860,700,660]",
+              "data": {
+                "pricing": {
+                  "system_price": 25200,
+                  "price_including_tax": 25200,
+                  "incentive_to_customer": 7560,
+                  "payback": 6.1,
+                  "npv": 36800
+                },
+                "payment_options": [
+                  {
+                    "id": "po1",
+                    "name": "Cash",
+                    "payment_type": "cash",
+                    "price_including_tax": 25200,
+                    "down_payment": 25200,
+                    "featured": true
+                  },
+                  {
+                    "id": "po2",
+                    "name": "Loan 20yr",
+                    "payment_type": "loan",
+                    "monthly_payment": 128,
+                    "term_months": 240,
+                    "apr": 5.49,
+                    "down_payment": 0,
+                    "price_including_tax": 25200
+                  }
+                ],
+                "module": {
+                  "code": "REC Alpha Pure 400",
+                  "manufacturer_name": "REC",
+                  "watts": 400,
+                  "quantity": 21
+                },
+                "inverters": [
+                  {
+                    "code": "Enphase IQ8+",
+                    "manufacturer_name": "Enphase",
+                    "quantity": 21
+                  }
+                ],
+                "batteries": [],
+                "bills": {
+                  "annual_utility_bill_without_solar": 2280,
+                  "annual_utility_bill_with_solar": 240,
+                  "utility_name": "Georgia Power"
+                },
+                "consumption": {
+                  "annual_kwh": 11000,
+                  "self_consumption_percentage": 94
+                },
+                "site": {
+                  "azimuth": 180,
+                  "tilt": 18
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

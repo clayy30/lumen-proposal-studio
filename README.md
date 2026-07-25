@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumen Proposal Studio
 
-## Getting Started
+Premium solar proposal & design tool — built to **outclass OpenSolar default PDFs** with an **Enerflo-class** presentation: clean, trustworthy, conversion-focused.
 
-First, run the development server:
+## What’s included
+
+| Area | Capability |
+|------|------------|
+| **Dashboard** | Pipeline KPIs, featured proposal, project table |
+| **CRM** | Project list with stage filters, search, source tags |
+| **OpenSolar import** | Parse `/api/user_logins/` proposal JSON (or compatible shapes) |
+| **Template engine** | Canonical model → multi-page customer deck |
+| **Design preview** | Address → stylized roof + panel layout visualization |
+| **PDF export** | Multi-page JPEG capture (html2canvas + jsPDF), plus browser print |
+
+## Quick start
 
 ```bash
+cd solar-proposal-studio
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## OpenSolar workflow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Export proposal data from OpenSolar (Raw Data API):
+   ```
+   GET https://api.opensolar.com/api/user_logins/?project_ids=<id>
+   Authorization: Bearer <token>
+   ```
+2. Save the JSON response.
+3. **Import** → drop the file (or click “Load sample OpenSolar export”).
+4. Open the generated **proposal** → **Export PDF**.
 
-## Learn More
+A sample file lives at `public/sample-opensolar.json`.
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js 16 (App Router) + React 19 + TypeScript  
+- Tailwind CSS 4  
+- Recharts (production charts)  
+- html2canvas + jsPDF (premium PDF)  
+- Local storage workspace (no backend required for v1)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project layout
 
-## Deploy on Vercel
+```
+src/
+  app/                  # Routes: dashboard, projects, import, proposals/[id]
+  components/
+    dashboard/          # Stats + tables
+    import/             # JSON dropzone
+    layout/             # App shell / sidebar
+    proposal/           # Template + design preview + toolbar
+  lib/
+    types.ts            # Canonical proposal model
+    opensolar-parser.ts # OpenSolar → Lumen mapper
+    sample-data.ts      # Demo portfolio
+    store.ts            # Client workspace
+    pdf-export.ts       # PDF pipeline
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Design language
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Sales UI:** deep charcoal, gold accent, DM Sans + Newsreader  
+- **Customer proposal:** warm paper `#faf9f6`, strong hierarchy, cover → design → savings → financing  
+
+## Next steps (roadmap)
+
+- Live map / satellite roof underlay  
+- True CAD panel placement from OpenSolar design zip  
+- Branding kit (logo, colors, fonts per org)  
+- e-sign + financing deep links  
+- Multi-user CRM backend
+
+## License
+
+Private — for your solar sales workflow.

@@ -1,65 +1,185 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { ArrowRight, Upload, Plus } from "lucide-react";
+import { StatsRow } from "@/components/dashboard/StatsRow";
+import { ProjectTable } from "@/components/dashboard/ProjectTable";
+import { useProjects } from "@/lib/store";
+import { projectToDashboardStats } from "@/lib/opensolar-parser";
+import { currency } from "@/lib/format";
+
+export default function DashboardPage() {
+  const { projects, hydrated } = useProjects();
+  const stats = projectToDashboardStats(projects);
+  const featured =
+    projects.find((p) => p.stage === "proposal") ?? projects[0];
+  const featuredSys =
+    featured?.systems.find((s) => s.id === featured.selectedSystemId) ??
+    featured?.systems[0];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="flex-1 px-6 py-8 sm:px-10">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="animate-fade-up">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--gold)]">
+            Command center
+          </p>
+          <h1 className="mt-1 font-display text-[2rem] font-semibold tracking-tight text-[var(--ink)] sm:text-[2.25rem]">
+            Dashboard
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-1.5 max-w-lg text-[14px] text-[var(--muted)]">
+            Build an in-home proposal in minutes — usage, utility, design, financing, and
+            real install photography.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="flex flex-wrap gap-2 animate-fade-up-delay">
+          <Link
+            href="/import"
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-[13px] font-semibold text-[var(--ink-2)] transition hover:border-[var(--gold)]/30 hover:text-[var(--ink)]"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <Upload className="h-4 w-4" />
+            Import OpenSolar
+          </Link>
+          <Link
+            href="/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--gold)] px-4 py-2.5 text-[13px] font-bold text-[#1a1508] shadow-[0_0_24px_rgba(201,162,39,0.25)] transition hover:brightness-110"
           >
-            Documentation
-          </a>
+            <Plus className="h-4 w-4" />
+            New proposal
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
-      </main>
+      </header>
+
+      <div className="mt-8 animate-fade-up-delay">
+        {hydrated ? (
+          <StatsRow stats={stats} />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-[120px] animate-pulse rounded-2xl bg-[var(--surface)]"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Featured proposal hero */}
+      {featured && featuredSys && (
+        <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--line)] bg-gradient-to-br from-[var(--surface)] via-[var(--surface)] to-[#1a1810]">
+          <div className="grid gap-0 lg:grid-cols-[1.2fr_1fr]">
+            <div className="p-6 sm:p-8">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--gold)]">
+                Featured proposal
+              </div>
+              <h2 className="mt-2 font-display text-[1.65rem] font-semibold tracking-tight text-[var(--ink)]">
+                {featured.primaryContact.fullName}
+              </h2>
+              <p className="mt-1 text-[13.5px] text-[var(--muted)]">
+                {featured.address.street}, {featured.address.city}
+              </p>
+              <div className="mt-6 flex flex-wrap gap-6">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--muted)]">
+                    System
+                  </div>
+                  <div className="mt-0.5 text-[18px] font-semibold tabular-nums">
+                    {featuredSys.kwStc.toFixed(2)} kW
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--muted)]">
+                    Price
+                  </div>
+                  <div className="mt-0.5 text-[18px] font-semibold tabular-nums">
+                    {currency(featuredSys.financials.systemPrice)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--muted)]">
+                    Mo. savings
+                  </div>
+                  <div className="mt-0.5 text-[18px] font-semibold tabular-nums text-emerald-400">
+                    {currency(
+                      featuredSys.bills.currentMonthly - featuredSys.bills.proposedMonthly
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Link
+                href={`/proposals/${featured.id}`}
+                className="mt-6 inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--gold)] hover:underline"
+              >
+                Preview customer deck
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            <div className="relative hidden min-h-[200px] border-t border-[var(--line)] bg-[#0e1410] lg:block lg:border-l lg:border-t-0">
+              <div
+                className="absolute inset-0 opacity-80"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 60% 40%, rgba(201,162,39,0.15), transparent 55%), linear-gradient(160deg, #1a2744 0%, #1a3020 100%)",
+                }}
+              />
+              <div className="relative flex h-full flex-col items-center justify-center p-8 text-center">
+                <div className="text-[48px] font-display font-semibold tracking-tight text-white">
+                  {featuredSys.production.offsetPercent}%
+                </div>
+                <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Energy offset
+                </div>
+                <div className="mt-4 text-[13px] text-white/50">
+                  {featuredSys.panelCount} panels ·{" "}
+                  {featuredSys.hasBattery ? "with storage" : "grid-tied"}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6">
+        <ProjectTable projects={projects} />
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/new"
+          className="group flex items-start gap-4 rounded-2xl border border-[var(--gold)]/25 bg-gradient-to-br from-[var(--gold-soft)] to-[var(--surface)] p-5 transition hover:border-[var(--gold)]/50"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--gold)] text-[#1a1508]">
+            <Plus className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-[14px] font-semibold text-[var(--ink)] group-hover:text-[var(--gold)]">
+              New proposal from usage
+            </div>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]">
+              Contact → address → utility bill / kWh → system goals → customer deck. Solo-style
+              intake for the kitchen table.
+            </p>
+          </div>
+        </Link>
+        <Link
+          href="/import"
+          className="group flex items-start gap-4 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:border-[var(--gold)]/30"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--gold-soft)] text-[var(--gold)]">
+            <Upload className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-[14px] font-semibold text-[var(--ink)] group-hover:text-[var(--gold)]">
+              Import OpenSolar design
+            </div>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]">
+              Drop proposal JSON — systems, bills, and financing map into the same premium deck.
+            </p>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
