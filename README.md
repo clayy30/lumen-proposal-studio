@@ -78,3 +78,24 @@ src/
 ## License
 
 Private — for your solar sales workflow.
+
+## Live (free — GitHub Pages)
+
+**App:** https://clayy30.github.io/lumen-proposal-studio/
+
+| Page | URL |
+|------|-----|
+| Dashboard | https://clayy30.github.io/lumen-proposal-studio/ |
+| New proposal | https://clayy30.github.io/lumen-proposal-studio/new/ |
+| Sample deck | https://clayy30.github.io/lumen-proposal-studio/proposal/?id=demo-1001 |
+
+No Vercel required. Every push to `main` rebuilds via GitHub Actions.
+
+### Why the repo is public
+GitHub Pages on a **private** repo needs a paid GitHub plan. Public + Pages is free. Code is at https://github.com/clayy30/lumen-proposal-studio
+
+### Local
+```bash
+npm run dev          # http://localhost:3000
+npm run build && npx serve out
+```
