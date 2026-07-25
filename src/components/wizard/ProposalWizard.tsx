@@ -119,7 +119,7 @@ export function ProposalWizard() {
       );
       const project = buildProposalFromWizard(data, coords);
       upsertProjects([project], "merge");
-      router.push(`/proposals/${project.id}`);
+      router.push(`/proposal/?id=${project.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not build proposal");
       setBusy(false);

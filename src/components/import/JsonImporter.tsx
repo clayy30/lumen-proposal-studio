@@ -173,7 +173,7 @@ export function JsonImporter() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => router.push(`/proposals/${p.id}`)}
+                      onClick={() => router.push(`/proposal/?id=${p.id}`)}
                       className="shrink-0 rounded-lg bg-[var(--gold)] px-3 py-1.5 text-[12px] font-bold text-[#1a1508]"
                     >
                       Open proposal

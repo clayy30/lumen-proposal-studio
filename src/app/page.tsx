@@ -109,7 +109,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <Link
-                href={`/proposals/${featured.id}`}
+                href={`/proposal/?id=${featured.id}`}
                 className="mt-6 inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--gold)] hover:underline"
               >
                 Preview customer deck

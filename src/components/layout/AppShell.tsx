@@ -19,14 +19,15 @@ const NAV = [
   { href: "/new", label: "New proposal", icon: PlusCircle },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/import", label: "Import", icon: Upload },
-  { href: "/proposals/demo-1001", label: "Sample deck", icon: FileText },
+  { href: "/proposal/?id=demo-1001", label: "Sample deck", icon: FileText },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isFullBleed =
-    (pathname.startsWith("/proposals/") && !pathname.includes("/edit")) ||
-    pathname === "/new";
+    pathname.startsWith("/proposal") ||
+    pathname === "/new" ||
+    pathname === "/new/";
 
   // Full-bleed proposal / wizard — no app chrome
   if (isFullBleed) {

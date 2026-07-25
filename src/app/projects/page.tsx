@@ -100,7 +100,7 @@ export default function ProjectsPage() {
           return (
             <Link
               key={p.id}
-              href={`/proposals/${p.id}`}
+              href={`/proposal/?id=${p.id}`}
               className="group flex flex-col gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:border-[var(--gold)]/25 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="min-w-0">

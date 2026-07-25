@@ -79,7 +79,7 @@ export function ProjectTable({ projects }: { projects: ProposalProject[] }) {
                   </td>
                   <td className="px-5 py-4 text-right">
                     <Link
-                      href={`/proposals/${p.id}`}
+                      href={`/proposal/?id=${p.id}`}
                       className="inline-flex items-center gap-1 rounded-lg bg-[var(--gold-soft)] px-3 py-1.5 text-[12px] font-semibold text-[var(--gold)] transition hover:bg-[var(--gold)]/20"
                     >
                       Open
