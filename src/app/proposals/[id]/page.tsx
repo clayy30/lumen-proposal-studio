@@ -40,12 +40,12 @@ export default function ProposalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-200/80">
+    <div className="min-h-screen bg-neutral-200/80 print:bg-white">
       <ProposalToolbar
         customerName={project.primaryContact.fullName}
         projectId={project.id}
       />
-      <div className="px-3 py-6 sm:px-6 sm:py-10">
+      <div className="px-3 py-6 sm:px-6 sm:py-10 print:p-0">
         <InteractiveProposal project={project} />
       </div>
     </div>
