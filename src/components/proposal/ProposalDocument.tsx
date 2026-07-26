@@ -32,7 +32,9 @@ import {
   percent,
   years,
 } from "@/lib/format";
+import { getEquipmentDocs, roleLabel } from "@/lib/equipment-docs";
 import type { ProposalProject } from "@/lib/types";
+import { ExternalLink, FileText } from "lucide-react";
 
 const MONTHS = [
   "Jan",
@@ -89,6 +91,7 @@ export function ProposalDocument({
     system.bills.combinedMonthly ??
     (loanPay?.monthlyPayment ?? 0) + system.bills.proposedMonthly;
   const savingsDelta = system.bills.currentMonthly - combinedPath;
+  const equipmentDocs = getEquipmentDocs(system);
 
   return (
     <div
@@ -336,17 +339,27 @@ export function ProposalDocument({
             icon={<Zap className="h-4 w-4" />}
             label="Modules"
             value={system.hardware.modules?.code ?? "—"}
-            sub={
+            sub={[
+              system.hardware.modules?.manufacturer,
               system.hardware.modules?.watts
                 ? `${system.hardware.modules.watts}W STC`
-                : undefined
-            }
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           />
           <SpecCard
             icon={<Sparkles className="h-4 w-4" />}
             label="Inverter"
             value={system.hardware.inverter?.code ?? "—"}
-            sub={system.hardware.inverter?.manufacturer}
+            sub={[
+              system.hardware.inverter?.manufacturer,
+              system.hardware.inverter?.quantity
+                ? `Qty ${system.hardware.inverter.quantity}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           />
           <SpecCard
             icon={<Battery className="h-4 w-4" />}
@@ -356,9 +369,23 @@ export function ProposalDocument({
                 ? `${system.batteryKwh ?? system.hardware.battery?.kwh ?? "—"} kWh`
                 : "None"
             }
-            sub={system.hardware.battery?.code}
+            sub={
+              system.hasBattery
+                ? system.hardware.battery?.code ?? "Battery"
+                : undefined
+            }
           />
         </div>
+        {equipmentDocs.length > 0 && (
+          <p className="mt-4 text-[12px] text-[var(--prop-muted)]">
+            Manufacturer details &amp; official datasheets are listed at the end of this
+            proposal under{" "}
+            <a href="#equipment-docs" className="font-semibold text-[var(--prop-ink)] underline-offset-2 hover:underline">
+              Equipment documentation
+            </a>
+            .
+          </p>
+        )}
       </section>
 
       {/* ═══════════════ 4. REAL INSTALL GALLERY ═══════════════ */}
@@ -897,10 +924,77 @@ export function ProposalDocument({
           </div>
         </div>
 
+        {/* Equipment docs — light footprint, links only */}
+        {equipmentDocs.length > 0 && (
+          <div
+            id="equipment-docs"
+            className="mt-10 rounded-2xl border border-black/[0.06] bg-white p-6"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--prop-ink)]/5">
+                <FileText className="h-4 w-4" strokeWidth={1.75} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#a88620]">
+                  Equipment documentation
+                </div>
+                <h3 className="mt-1 text-[15px] font-semibold text-[var(--prop-ink)]">
+                  Manufacturers &amp; official spec sheets
+                </h3>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--prop-muted)]">
+                  Full datasheets live with the manufacturers. Links below open the product
+                  page or download library for the equipment specified on this design.
+                </p>
+
+                <ul className="mt-5 space-y-4">
+                  {equipmentDocs.map((doc) => (
+                    <li
+                      key={doc.id}
+                      className="border-t border-black/[0.05] pt-4 first:border-t-0 first:pt-0"
+                    >
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--prop-muted)]">
+                        {roleLabel(doc.role)} · {doc.manufacturer}
+                      </div>
+                      <div className="mt-0.5 text-[13.5px] font-semibold text-[var(--prop-ink)]">
+                        {doc.productName}
+                      </div>
+                      <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--prop-muted)]">
+                        {doc.summary}
+                      </p>
+                      {doc.highlights.length > 0 && (
+                        <p className="mt-1.5 text-[11.5px] text-[var(--prop-ink)]/70">
+                          {doc.highlights.join(" · ")}
+                        </p>
+                      )}
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                        {doc.links.map((link) => (
+                          <a
+                            key={link.href + link.label}
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#8a7018] underline-offset-2 hover:underline"
+                          >
+                            {link.label}
+                            <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
+                          </a>
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         <p className="mt-8 text-center text-[10.5px] leading-relaxed text-[var(--prop-muted)]">
           Estimates only. Production, savings, incentives, and financing subject
           to final site survey, utility approval, credit, and program rules. Not
-          a binding offer. © {new Date().getFullYear()} {project.org.name}.
+          a binding offer. Equipment subject to availability; equivalents may be
+          substituted with equal or better specifications. Manufacturer warranties
+          are provided by the equipment makers — see linked documentation. ©{" "}
+          {new Date().getFullYear()} {project.org.name}.
         </p>
       </section>
     </div>
