@@ -56,6 +56,7 @@ function ProposalViewInner() {
       <ProposalToolbar
         customerName={resolved.primaryContact.fullName}
         projectId={resolved.id}
+        project={resolved}
       />
       <div className="px-3 py-6 sm:px-6 sm:py-10 print:p-0">
         <InteractiveProposal project={resolved} />

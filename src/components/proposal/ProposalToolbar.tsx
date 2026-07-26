@@ -9,22 +9,33 @@ import {
   Printer,
   Share2,
   Check,
+  DraftingCompass,
 } from "lucide-react";
 import { exportProposalPdf } from "@/lib/pdf-export";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import {
+  checkPlansetHealth,
+  pushProposalToPlanset,
+} from "@/lib/planset-bridge";
+import type { ProposalProject } from "@/lib/types";
 
 export function ProposalToolbar({
   customerName,
   projectId,
+  project,
 }: {
   customerName: string;
   projectId: string;
+  /** Full project for planset bridge */
+  project?: ProposalProject;
 }) {
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [pushing, setPushing] = useState(false);
+  const [plansetUrl, setPlansetUrl] = useState<string | null>(null);
 
   async function handlePdf() {
     setError(null);
@@ -78,6 +89,56 @@ export function ProposalToolbar({
     setTimeout(() => window.print(), 50);
   }
 
+  async function handlePushPlanset() {
+    setError(null);
+    setPlansetUrl(null);
+    if (!project) {
+      setError("Project data not available for planset export.");
+      return;
+    }
+    setPushing(true);
+    setProgress("Checking plan set builder…");
+    try {
+      const health = await checkPlansetHealth();
+      if (!health.ok) {
+        setError(
+          health.detail ||
+            "Plan set builder not reachable. Run: cd ~/planset-generator && ./run.sh"
+        );
+        return;
+      }
+      setProgress("Sending to engineering…");
+      const result = await pushProposalToPlanset(project, { generate: true });
+      if (!result.ok) {
+        setError(result.error || "Planset import failed");
+        return;
+      }
+      const url = result.url_planset || result.url_open || null;
+      setPlansetUrl(url);
+      setSuccess(true);
+      setProgress(null);
+      if (url) {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+      try {
+        localStorage.setItem(
+          `lumen-planset-link:${projectId}`,
+          JSON.stringify({
+            plansetId: result.project_id,
+            url,
+            at: new Date().toISOString(),
+          })
+        );
+      } catch {
+        /* ignore */
+      }
+      setTimeout(() => setSuccess(false), 5000);
+    } finally {
+      setPushing(false);
+      setProgress(null);
+    }
+  }
+
   async function handleShare() {
     const url = window.location.href;
     try {
@@ -128,10 +189,28 @@ export function ProposalToolbar({
 
         <div className="flex items-center gap-1.5">
           <ThemeToggle compact className="text-[var(--muted)] hover:bg-[var(--hover)]" />
+          {project && (
+            <button
+              type="button"
+              onClick={() => void handlePushPlanset()}
+              disabled={exporting || pushing}
+              title="Push customer, array, and equipment into Plan Set Builder"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--line-strong)] bg-[var(--surface)] px-3 text-[12.5px] font-semibold text-[var(--ink)] transition hover:bg-[var(--hover)] disabled:opacity-50"
+            >
+              {pushing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <DraftingCompass className="h-4 w-4 text-[var(--gold)]" />
+              )}
+              <span className="hidden sm:inline">
+                {pushing ? "Sending…" : "Plan set"}
+              </span>
+            </button>
+          )}
           <button
             type="button"
             onClick={handleShare}
-            disabled={exporting}
+            disabled={exporting || pushing}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-medium text-[var(--muted)] transition hover:bg-[var(--hover)] hover:text-[var(--ink)] disabled:opacity-50"
           >
             {copied ? (
@@ -170,15 +249,30 @@ export function ProposalToolbar({
       </div>
       {error && (
         <div className="border-t border-red-100 bg-red-50 px-4 py-2.5 text-center text-[12px] text-red-700">
-          <span className="font-semibold">PDF export: </span>
+          <span className="font-semibold">Error: </span>
           {error}{" "}
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="ml-1 font-semibold underline"
+          {error.toLowerCase().includes("pdf") && (
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="ml-1 font-semibold underline"
+            >
+              Use Print → Save as PDF instead
+            </button>
+          )}
+        </div>
+      )}
+      {plansetUrl && !error && (
+        <div className="border-t border-emerald-100 bg-emerald-50 px-4 py-2 text-center text-[12px] text-emerald-800">
+          Planset ready.{" "}
+          <a
+            href={plansetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline"
           >
-            Use Print → Save as PDF instead
-          </button>
+            Open engineering package
+          </a>
         </div>
       )}
     </div>

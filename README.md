@@ -79,6 +79,21 @@ src/
 
 Private — for your solar sales workflow.
 
+## Platform bridge: Plan Set Builder
+
+Sales proposals push into your local **planset-generator** (Doctor Planset) for permit packages.
+
+1. Start engineering:
+   ```bash
+   cd ~/planset-generator && ./run.sh
+   # → http://127.0.0.1:8787
+   ```
+2. Open a proposal in Lumen → toolbar **Plan set**
+3. Customer, address, modules, inverters, batteries, and array groups import → planset HTML opens
+
+API: `POST http://127.0.0.1:8787/api/import/lumen` with ProposalProject JSON.  
+Override base URL: `localStorage.setItem('lumen-planset-api', 'http://127.0.0.1:8787')`
+
 ## Live (free — GitHub Pages)
 
 **App:** https://clayy30.github.io/lumen-proposal-studio/
