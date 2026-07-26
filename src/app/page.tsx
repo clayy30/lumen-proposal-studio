@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Upload, Plus } from "lucide-react";
+import { ArrowRight, Upload, Plus, FileText } from "lucide-react";
 import { StatsRow } from "@/components/dashboard/StatsRow";
 import { ProjectTable } from "@/components/dashboard/ProjectTable";
 import { useProjects } from "@/lib/store";
@@ -160,6 +160,24 @@ export default function DashboardPage() {
             <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]">
               Contact → address → utility bill / kWh → system goals → customer deck. Solo-style
               intake for the kitchen table.
+            </p>
+          </div>
+        </Link>
+        <Link
+          href="/estimate"
+          className="group flex items-start gap-4 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:border-[var(--gold)]/30 sm:col-span-2"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--gold-soft)] text-[var(--gold)]">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-[14px] font-semibold text-[var(--ink)] group-hover:text-[var(--gold)]">
+              Self-Engineered (homeowner)
+            </div>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--muted)]">
+              Public preliminary estimate — homeowner builds their own first-pass plan. Embed on
+              your site:{" "}
+              <code className="text-[11px] text-[var(--ink-2)]">/estimate</code>
             </p>
           </div>
         </Link>

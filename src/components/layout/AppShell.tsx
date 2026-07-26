@@ -17,6 +17,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/new", label: "New proposal", icon: PlusCircle },
+  { href: "/estimate", label: "Self-Engineered", icon: Sparkles },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/import", label: "Import", icon: Upload },
   { href: "/proposal/?id=demo-1001", label: "Sample deck", icon: FileText },
@@ -27,7 +28,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isFullBleed =
     pathname.startsWith("/proposal") ||
     pathname === "/new" ||
-    pathname === "/new/";
+    pathname === "/new/" ||
+    pathname.startsWith("/estimate");
 
   // Full-bleed proposal / wizard — no app chrome
   if (isFullBleed) {
