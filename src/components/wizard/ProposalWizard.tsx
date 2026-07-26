@@ -18,6 +18,8 @@ import {
   UTILITIES,
   buildProposalFromWizard,
   buildPersonalizedProposal,
+  correlateBillAndKwh,
+  getPortfolioRate,
   type WizardInput,
 } from "@/lib/proposal-engine";
 import { useProjects } from "@/lib/store";
@@ -320,14 +322,41 @@ export function ProposalWizard() {
             <StepShell
               eyebrow="Energy usage"
               title="Utility & bill"
-              sub="Enter monthly bill or annual kWh from the statement — whichever you have."
+              sub="Enter monthly bill or annual kWh — the other fills at your utility’s avg all-in rate."
             >
               <div className="grid gap-4">
                 <Field label="Utility company" required>
                   <select
                     className="field"
                     value={data.utilityName}
-                    onChange={(e) => patch({ utilityName: e.target.value })}
+                    onChange={(e) => {
+                      const utilityName = e.target.value;
+                      if (data.monthlyBill && data.monthlyBill > 0) {
+                        const c = correlateBillAndKwh({
+                          monthlyBill: data.monthlyBill,
+                          utilityName,
+                          source: "bill",
+                        });
+                        patch({
+                          utilityName,
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      } else if (data.annualKwh && data.annualKwh > 0) {
+                        const c = correlateBillAndKwh({
+                          annualKwh: data.annualKwh,
+                          utilityName,
+                          source: "kwh",
+                        });
+                        patch({
+                          utilityName,
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      } else {
+                        patch({ utilityName });
+                      }
+                    }}
                   >
                     {UTILITIES.map((u) => (
                       <option key={u} value={u}>
@@ -337,7 +366,10 @@ export function ProposalWizard() {
                   </select>
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Avg monthly bill ($)" hint="Pick or type exact">
+                  <Field
+                    label="Avg monthly bill ($)"
+                    hint={`↔ kWh @ ${(getPortfolioRate(data.utilityName) * 100).toFixed(1)}¢`}
+                  >
                     <input
                       className="field"
                       type="number"
@@ -345,13 +377,20 @@ export function ProposalWizard() {
                       step={1}
                       list="bill-presets"
                       value={data.monthlyBill ?? ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const monthlyBill = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        const c = correlateBillAndKwh({
+                          monthlyBill,
+                          utilityName: data.utilityName,
+                          source: "bill",
+                        });
                         patch({
-                          monthlyBill: e.target.value
-                            ? Number(e.target.value)
-                            : undefined,
-                        })
-                      }
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      }}
                       placeholder="218"
                       autoFocus
                     />
@@ -361,7 +400,10 @@ export function ProposalWizard() {
                       ))}
                     </datalist>
                   </Field>
-                  <Field label="Annual kWh" hint="Optional if you have bill $">
+                  <Field
+                    label="Annual kWh"
+                    hint={`↔ bill @ ${(getPortfolioRate(data.utilityName) * 100).toFixed(1)}¢`}
+                  >
                     <input
                       className="field"
                       type="number"
@@ -369,13 +411,20 @@ export function ProposalWizard() {
                       step={100}
                       list="kwh-presets"
                       value={data.annualKwh ?? ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const annualKwh = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        const c = correlateBillAndKwh({
+                          annualKwh,
+                          utilityName: data.utilityName,
+                          source: "kwh",
+                        });
                         patch({
-                          annualKwh: e.target.value
-                            ? Number(e.target.value)
-                            : undefined,
-                        })
-                      }
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      }}
                       placeholder="13200"
                     />
                     <datalist id="kwh-presets">
@@ -387,6 +436,17 @@ export function ProposalWizard() {
                     </datalist>
                   </Field>
                 </div>
+                <p className="text-[12px] text-[var(--muted)]">
+                  Linked at{" "}
+                  <strong className="text-[var(--ink-2)]">
+                    ${(getPortfolioRate(data.utilityName)).toFixed(3)}/kWh
+                  </strong>{" "}
+                  {data.utilityName.includes("Georgia")
+                    ? "(Georgia Power avg all-in). "
+                    : "(portfolio avg). "}
+                  Edit either field — the other updates. When both come from a real bill,
+                  savings use bill ÷ kWh.
+                </p>
                 {preview && (
                   <div className="mt-2 grid grid-cols-2 gap-3 rounded-2xl border border-[var(--line)] bg-black/20 p-4 sm:grid-cols-4">
                     <MiniStat

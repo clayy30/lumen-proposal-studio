@@ -511,5 +511,12 @@ export async function buildPersonalizedProposal(
 }
 
 // Re-export for wizard live preview
-export { computeRealRate, computeCashFlow, getRatePlan } from "./rates";
+export {
+  computeRealRate,
+  computeCashFlow,
+  getRatePlan,
+  getPortfolioRate,
+  correlateBillAndKwh,
+  DEFAULT_EFFECTIVE_RATES,
+} from "./rates";
 export { fetchSolarResource } from "./solar-resource";

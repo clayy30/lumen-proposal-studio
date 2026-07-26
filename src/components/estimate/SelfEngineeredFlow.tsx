@@ -18,6 +18,8 @@ import {
   UTILITIES,
   buildProposalFromWizard,
   buildPersonalizedProposal,
+  correlateBillAndKwh,
+  getPortfolioRate,
   type WizardInput,
 } from "@/lib/proposal-engine";
 import { useProjects } from "@/lib/store";
@@ -270,8 +272,12 @@ export function SelfEngineeredFlow() {
                 What do you pay for power?
               </h2>
               <p className="mt-1 text-[13px] text-[var(--muted)]">
-                We calculate your <strong className="text-[var(--ink)]">real all-in rate</strong>{" "}
-                (bill ÷ kWh, including fees & tax).
+                Enter bill <strong className="text-[var(--ink)]">or</strong> kWh — the other
+                fills at{" "}
+                <strong className="text-[var(--ink)]">
+                  ${getPortfolioRate(data.utilityName).toFixed(3)}/kWh
+                </strong>
+                {data.utilityName.includes("Georgia") ? " (Georgia Power avg)" : ""}.
               </p>
               <div className="mt-6 space-y-3">
                 <label className="block">
@@ -281,7 +287,34 @@ export function SelfEngineeredFlow() {
                   <select
                     className="field"
                     value={data.utilityName}
-                    onChange={(e) => patch({ utilityName: e.target.value })}
+                    onChange={(e) => {
+                      const utilityName = e.target.value;
+                      if (data.monthlyBill && data.monthlyBill > 0) {
+                        const c = correlateBillAndKwh({
+                          monthlyBill: data.monthlyBill,
+                          utilityName,
+                          source: "bill",
+                        });
+                        patch({
+                          utilityName,
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      } else if (data.annualKwh && data.annualKwh > 0) {
+                        const c = correlateBillAndKwh({
+                          annualKwh: data.annualKwh,
+                          utilityName,
+                          source: "kwh",
+                        });
+                        patch({
+                          utilityName,
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      } else {
+                        patch({ utilityName });
+                      }
+                    }}
                   >
                     {UTILITIES.map((u) => (
                       <option key={u} value={u}>
@@ -301,13 +334,20 @@ export function SelfEngineeredFlow() {
                       min={0}
                       list="se-bills"
                       value={data.monthlyBill ?? ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const monthlyBill = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        const c = correlateBillAndKwh({
+                          monthlyBill,
+                          utilityName: data.utilityName,
+                          source: "bill",
+                        });
                         patch({
-                          monthlyBill: e.target.value
-                            ? Number(e.target.value)
-                            : undefined,
-                        })
-                      }
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      }}
                       placeholder="218"
                       autoFocus
                     />
@@ -316,25 +356,38 @@ export function SelfEngineeredFlow() {
                         <option key={b} value={b} />
                       ))}
                     </datalist>
+                    <span className="mt-1 block text-[11px] text-[var(--muted)]">
+                      ↔ fills annual kWh
+                    </span>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-[12px] font-semibold text-[var(--ink-2)]">
-                      Annual kWh (optional)
+                      Annual kWh
                     </span>
                     <input
                       className="field"
                       type="number"
                       min={0}
                       value={data.annualKwh ?? ""}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const annualKwh = e.target.value
+                          ? Number(e.target.value)
+                          : undefined;
+                        const c = correlateBillAndKwh({
+                          annualKwh,
+                          utilityName: data.utilityName,
+                          source: "kwh",
+                        });
                         patch({
-                          annualKwh: e.target.value
-                            ? Number(e.target.value)
-                            : undefined,
-                        })
-                      }
+                          monthlyBill: c.monthlyBill,
+                          annualKwh: c.annualKwh,
+                        });
+                      }}
                       placeholder="13200"
                     />
+                    <span className="mt-1 block text-[11px] text-[var(--muted)]">
+                      ↔ fills monthly bill
+                    </span>
                   </label>
                 </div>
 

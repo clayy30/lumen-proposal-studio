@@ -5,11 +5,9 @@
  *   realRate = total electric $ charged  /  kWh used
  * Includes energy, FCR, ECCR, franchise fees, sales tax — everything on the bill.
  *
- * Sample residential GP bills extracted from this machine (bill $ / kWh):
- *   Bob Vaccaro ~$0.157, Kassidy ~$0.151, 1033 North Ave ~$0.186,
- *   Ashok ~$0.118, Pamela Lovato (low usage) ~$0.236 (fixed charges dominate),
- *   GeorgiaPowerBill Jun'22 ~$0.141
- * Portfolio typical blended residential ≈ $0.14–$0.19/kWh.
+ * Georgia Power residential portfolio average (current): $0.195/kWh all-in.
+ * Used when only bill $ or only kWh is known to correlate the other field.
+ * When both are known from a real bill, realRate = bill ÷ kWh (fees + tax).
  */
 
 export type RatePlanId =
@@ -84,10 +82,13 @@ export const RATE_PLANS: Record<string, RatePlan> = {
   },
 };
 
-/** Fallback when only utility known (no bill math) — mid of your real-bill sample set */
+/**
+ * Portfolio all-in rates when only bill $ or only kWh is known.
+ * Georgia Power / Savannah Electric: current residential average ≈ $0.195/kWh.
+ */
 export const DEFAULT_EFFECTIVE_RATES: Record<string, number> = {
-  "Georgia Power": 0.155,
-  "Savannah Electric / Georgia Power": 0.155,
+  "Georgia Power": 0.195,
+  "Savannah Electric / Georgia Power": 0.195,
   "Dominion Energy": 0.14,
   "Duke Energy": 0.135,
   "Florida Power & Light": 0.14,
@@ -98,6 +99,49 @@ export const DEFAULT_EFFECTIVE_RATES: Record<string, number> = {
   SCE: 0.28,
   "Other / Not listed": 0.15,
 };
+
+/** Portfolio rate for a utility (used for bill ↔ kWh correlation). */
+export function getPortfolioRate(utilityName?: string): number {
+  if (!utilityName) return 0.15;
+  return DEFAULT_EFFECTIVE_RATES[utilityName] ?? 0.15;
+}
+
+/**
+ * Two-way bill ↔ kWh correlation at the utility's portfolio all-in rate.
+ * - monthly bill ($) → annual kWh = (bill × 12) / rate
+ * - annual kWh → monthly bill = (kWh × rate) / 12
+ */
+export function correlateBillAndKwh(opts: {
+  monthlyBill?: number;
+  annualKwh?: number;
+  utilityName?: string;
+  /** Which field the user just edited — drives the other. */
+  source: "bill" | "kwh";
+}): { monthlyBill?: number; annualKwh?: number; ratePerKwh: number } {
+  const rate = getPortfolioRate(opts.utilityName);
+
+  if (opts.source === "bill") {
+    const bill = opts.monthlyBill;
+    if (bill == null || !(bill > 0)) {
+      return { monthlyBill: undefined, annualKwh: undefined, ratePerKwh: rate };
+    }
+    return {
+      monthlyBill: bill,
+      annualKwh: Math.round((bill * 12) / rate),
+      ratePerKwh: rate,
+    };
+  }
+
+  const kwh = opts.annualKwh;
+  if (kwh == null || !(kwh > 0)) {
+    return { monthlyBill: undefined, annualKwh: undefined, ratePerKwh: rate };
+  }
+  return {
+    annualKwh: kwh,
+    monthlyBill: Math.round((kwh * rate) / 12),
+    ratePerKwh: rate,
+  };
+}
 
 /**
  * Real all-in $/kWh from the customer's bill.
