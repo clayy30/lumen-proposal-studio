@@ -38,10 +38,10 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
       phone: "(912) 555-0142",
     },
     org: {
-      id: "org-lumen",
-      name: "Lumen Solar",
+      id: "org-c2",
+      name: "C2",
       phone: "(912) 555-8800",
-      website: "https://lumensolar.example",
+      website: "https://c2.example",
       about:
         "Premium residential solar design and installation. We engineer systems that look as good as they perform.",
       highlightColor: "#C9A227",
@@ -49,7 +49,7 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
     assignedRep: {
       id: "rep1",
       name: "Jordan Hale",
-      email: "jordan@lumensolar.example",
+      email: "jordan@c2.example",
       phone: "(912) 555-8801",
       scheduleUrl: "#",
       scheduleLabel: "Book a design review",
@@ -301,14 +301,14 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
       phone: "(912) 555-0199",
     },
     org: {
-      id: "org-lumen",
-      name: "Lumen Solar",
+      id: "org-c2",
+      name: "C2",
       phone: "(912) 555-8800",
       highlightColor: "#C9A227",
     },
     assignedRep: {
       name: "Jordan Hale",
-      email: "jordan@lumensolar.example",
+      email: "jordan@c2.example",
     },
     source: "sample",
     systems: [
@@ -421,8 +421,8 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
       phone: "(912) 555-0110",
     },
     org: {
-      id: "org-lumen",
-      name: "Lumen Solar",
+      id: "org-c2",
+      name: "C2",
       phone: "(912) 555-8800",
       highlightColor: "#C9A227",
     },
@@ -530,8 +530,8 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
       phone: "(912) 555-0177",
     },
     org: {
-      id: "org-lumen",
-      name: "Lumen Solar",
+      id: "org-c2",
+      name: "C2",
       phone: "(912) 555-8800",
       highlightColor: "#C9A227",
     },

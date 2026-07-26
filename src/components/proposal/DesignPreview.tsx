@@ -45,7 +45,7 @@ export function DesignPreview({
     : "PROJECT SITE";
 
   const sheetId = (projectId ?? system.id).slice(0, 12).toUpperCase();
-  const company = orgName ?? "LUMEN SOLAR";
+  const company = orgName ?? "C2";
   const dateStr = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "2-digit",

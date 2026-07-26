@@ -1,5 +1,5 @@
 /**
- * Bridge: Lumen Proposal Studio → Planset Generator (Doctor Planset).
+ * Bridge: C2 Proposal Studio → Planset Generator (Doctor Planset).
  *
  * Default local API: http://127.0.0.1:8787
  * Override with localStorage key `lumen-planset-api` or NEXT_PUBLIC_PLANSET_API.
@@ -71,7 +71,7 @@ export async function checkPlansetHealth(
 }
 
 /**
- * Push a Lumen proposal into the planset generator.
+ * Push a C2 proposal into the planset generator.
  * Creates a project and generates the HTML planset package.
  */
 export async function pushProposalToPlanset(

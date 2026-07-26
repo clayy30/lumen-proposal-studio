@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <div className="text-[15px] font-semibold tracking-tight text-[var(--ink)]">
-              Lumen
+              C2
             </div>
             <div className="text-[11px] font-medium tracking-[0.08em] uppercase text-[var(--muted)]">
               Proposal Studio

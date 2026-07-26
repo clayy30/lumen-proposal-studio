@@ -45,7 +45,7 @@ const empty: WizardInput = {
   annualKwh: undefined,
   offsetTarget: 0.95,
   includeBattery: false,
-  companyName: "Lumen Solar",
+  companyName: "C2",
   repName: "Self-Engineered estimate",
 };
 
@@ -101,7 +101,7 @@ export function SelfEngineeredFlow() {
       const project = await buildPersonalizedProposal({
         ...data,
         repName: "Self-Engineered (web)",
-        companyName: data.companyName || "Lumen Solar",
+        companyName: data.companyName || "C2",
       });
       project.source = "manual";
       project.tags = [
@@ -607,7 +607,7 @@ export function SelfEngineeredFlow() {
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <a
-                  href={`mailto:hello@lumensolar.example?subject=${encodeURIComponent(
+                  href={`mailto:hello@c2.example?subject=${encodeURIComponent(
                     `Self-Engineered estimate — ${data.firstName} ${data.lastName}`
                   )}&body=${encodeURIComponent(
                     `I'd like a free site review.\n\nAddress: ${data.street}, ${data.city}, ${data.state} ${data.zip}\nBill: $${data.monthlyBill ?? "—"}\nPhone: ${data.phone}\nEstimate id: ${projectId}`

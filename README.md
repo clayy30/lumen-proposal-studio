@@ -1,4 +1,4 @@
-# Lumen Proposal Studio
+# C2 Proposal Studio
 
 Premium solar proposal & design tool — built to **outclass OpenSolar default PDFs** with an **Enerflo-class** presentation: clean, trustworthy, conversion-focused.
 
@@ -56,7 +56,7 @@ src/
     proposal/           # Template + design preview + toolbar
   lib/
     types.ts            # Canonical proposal model
-    opensolar-parser.ts # OpenSolar → Lumen mapper
+    opensolar-parser.ts # OpenSolar → C2 mapper
     sample-data.ts      # Demo portfolio
     store.ts            # Client workspace
     pdf-export.ts       # PDF pipeline
@@ -88,7 +88,7 @@ Sales proposals push into your local **planset-generator** (Doctor Planset) for 
    cd ~/planset-generator && ./run.sh
    # → http://127.0.0.1:8787
    ```
-2. Open a proposal in Lumen → toolbar **Plan set**
+2. Open a proposal in C2 → toolbar **Plan set**
 3. Customer, address, modules, inverters, batteries, and array groups import → planset HTML opens
 
 API: `POST http://127.0.0.1:8787/api/import/lumen` with ProposalProject JSON.  

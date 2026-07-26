@@ -23,7 +23,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lumen Proposal Studio",
+  title: "C2 Proposal Studio",
   description:
     "Premium solar proposals — OpenSolar-compatible designs, Enerflo-level polish, conversion-focused PDFs.",
 };

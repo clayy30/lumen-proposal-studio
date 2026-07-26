@@ -117,7 +117,7 @@ export function JsonImporter() {
         <p className="mx-auto mt-2 max-w-sm text-[13.5px] leading-relaxed text-[var(--muted)]">
           Accepts OpenSolar proposal data (
           <code className="text-[12px] text-[var(--ink-2)]">/api/user_logins/</code>
-          ), project arrays, or Lumen-normalized JSON.
+          ), project arrays, or C2-normalized JSON.
         </p>
         <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5 text-[12px] text-[var(--ink-2)] ring-1 ring-white/[0.06]">
           <FileJson className="h-3.5 w-3.5 text-[var(--gold)]" />

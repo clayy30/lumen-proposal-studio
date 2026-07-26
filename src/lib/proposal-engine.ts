@@ -364,7 +364,7 @@ export async function geocodeAddress(
       {
         headers: {
           Accept: "application/json",
-          "User-Agent": "LumenProposalStudio/1.0 (solar sales tool)",
+          "User-Agent": "C2ProposalStudio/1.0 (solar sales tool)",
         },
       }
     );
@@ -414,10 +414,10 @@ export function buildProposalFromWizard(
   };
 
   const org: OrgBrand = {
-    id: "org-lumen",
-    name: input.companyName?.trim() || "Lumen Solar",
+    id: "org-c2",
+    name: input.companyName?.trim() || "C2",
     phone: input.repPhone || "(912) 555-8800",
-    website: "https://lumensolar.example",
+    website: "https://c2.example",
     about:
       "Premium residential solar. Site-specific sun hours, real-rate bill math, financing that pencils.",
     highlightColor: "#C9A227",
