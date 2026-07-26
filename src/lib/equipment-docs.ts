@@ -36,12 +36,17 @@ const MODULE_CATALOG: CatalogEntry[] = [
     highlights: ["~400W class STC", "25-yr product / 25-yr power warranty class", "Lead-free design family"],
     links: [
       {
-        label: "REC Alpha Pure product page",
-        href: "https://www.recgroup.com/en/products/rec-alpha-pure-series",
+        // /en/alpha stays English; /en/downloads geo-redirects to German
+        label: "REC Alpha Pure family (English)",
+        href: "https://www.recgroup.com/en/alpha",
       },
       {
-        label: "REC datasheets & downloads",
-        href: "https://www.recgroup.com/en/downloads",
+        label: "Alpha Pure-R datasheet (English PDF)",
+        href: "https://www.recgroup.com/sites/default/files/2025-01/Web_DS_REC_Alpha_Pure-R_EN.pdf",
+      },
+      {
+        label: "Alpha Pure-RX datasheet (English US PDF)",
+        href: "https://www.recgroup.com/sites/default/files/2025-04/Web_DS_REC%20Alpha%20Pure-RX_EN%20US_042025.pdf",
       },
     ],
   },
