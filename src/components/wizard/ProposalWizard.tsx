@@ -29,6 +29,12 @@ import {
   loadMaterialsCatalog,
   type MaterialsCatalog,
 } from "@/lib/materials-catalog";
+import {
+  BILL_PRESETS,
+  COMMON_CITIES,
+  OFFSET_PRESETS,
+  US_STATES,
+} from "@/lib/form-options";
 
 const STEPS = [
   { id: "contact", label: "Homeowner", icon: User },
@@ -272,21 +278,29 @@ export function ProposalWizard() {
                   <Field label="City" required className="sm:col-span-1">
                     <input
                       className="field"
+                      list="city-options"
                       value={data.city}
                       onChange={(e) => patch({ city: e.target.value })}
                       placeholder="Savannah"
                     />
+                    <datalist id="city-options">
+                      {COMMON_CITIES.map((c) => (
+                        <option key={c} value={c === "Other" ? "" : c} />
+                      ))}
+                    </datalist>
                   </Field>
                   <Field label="State" required>
-                    <input
-                      className="field uppercase"
+                    <select
+                      className="field"
                       value={data.state}
-                      maxLength={2}
-                      onChange={(e) =>
-                        patch({ state: e.target.value.toUpperCase() })
-                      }
-                      placeholder="GA"
-                    />
+                      onChange={(e) => patch({ state: e.target.value })}
+                    >
+                      {US_STATES.map((s) => (
+                        <option key={s.code} value={s.code}>
+                          {s.code} — {s.name}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <Field label="ZIP" required>
                     <input
@@ -294,6 +308,7 @@ export function ProposalWizard() {
                       value={data.zip}
                       onChange={(e) => patch({ zip: e.target.value })}
                       placeholder="31406"
+                      inputMode="numeric"
                     />
                   </Field>
                 </div>
@@ -322,12 +337,13 @@ export function ProposalWizard() {
                   </select>
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Avg monthly bill ($)" hint="From a recent bill">
+                  <Field label="Avg monthly bill ($)" hint="Pick or type exact">
                     <input
                       className="field"
                       type="number"
                       min={0}
                       step={1}
+                      list="bill-presets"
                       value={data.monthlyBill ?? ""}
                       onChange={(e) =>
                         patch({
@@ -339,6 +355,11 @@ export function ProposalWizard() {
                       placeholder="218"
                       autoFocus
                     />
+                    <datalist id="bill-presets">
+                      {BILL_PRESETS.map((b) => (
+                        <option key={b} value={b} />
+                      ))}
+                    </datalist>
                   </Field>
                   <Field label="Annual kWh" hint="Optional if you have bill $">
                     <input
@@ -346,6 +367,7 @@ export function ProposalWizard() {
                       type="number"
                       min={0}
                       step={100}
+                      list="kwh-presets"
                       value={data.annualKwh ?? ""}
                       onChange={(e) =>
                         patch({
@@ -356,6 +378,13 @@ export function ProposalWizard() {
                       }
                       placeholder="13200"
                     />
+                    <datalist id="kwh-presets">
+                      {[6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000, 24000].map(
+                        (k) => (
+                          <option key={k} value={k} />
+                        )
+                      )}
+                    </datalist>
                   </Field>
                 </div>
                 {preview && (
@@ -465,31 +494,24 @@ export function ProposalWizard() {
                   </select>
                 </label>
 
-                <div>
-                  <div className="mb-2 flex justify-between text-[13px]">
-                    <span className="font-medium text-[var(--ink-2)]">
-                      Energy offset target
-                    </span>
-                    <span className="font-semibold text-[var(--gold)]">
-                      {Math.round(data.offsetTarget * 100)}%
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={70}
-                    max={110}
-                    step={5}
-                    value={Math.round(data.offsetTarget * 100)}
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[var(--ink-2)]">
+                    Energy offset target
+                  </span>
+                  <select
+                    className="field"
+                    value={String(data.offsetTarget)}
                     onChange={(e) =>
-                      patch({ offsetTarget: Number(e.target.value) / 100 })
+                      patch({ offsetTarget: Number(e.target.value) })
                     }
-                    className="w-full accent-[var(--gold)]"
-                  />
-                  <div className="mt-1 flex justify-between text-[11px] text-[var(--muted)]">
-                    <span>70% · lower cost</span>
-                    <span>110% · future EV headroom</span>
-                  </div>
-                </div>
+                  >
+                    {OFFSET_PRESETS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
                 {preview && (
                   <div className="space-y-3">

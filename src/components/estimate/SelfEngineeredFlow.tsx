@@ -24,6 +24,7 @@ import { useProjects } from "@/lib/store";
 import { currency } from "@/lib/format";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { SOLAR_MEDIA } from "@/lib/media";
+import { BILL_PRESETS, COMMON_CITIES, US_STATES } from "@/lib/form-options";
 
 const STEPS = ["home", "usage", "you", "results"] as const;
 type Step = (typeof STEPS)[number];
@@ -213,24 +214,32 @@ export function SelfEngineeredFlow() {
                     </span>
                     <input
                       className="field"
+                      list="se-cities"
                       value={data.city}
                       onChange={(e) => patch({ city: e.target.value })}
                       placeholder="Savannah"
                     />
+                    <datalist id="se-cities">
+                      {COMMON_CITIES.filter((c) => c !== "Other").map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-[12px] font-semibold text-[var(--ink-2)]">
                       State
                     </span>
-                    <input
-                      className="field uppercase"
-                      maxLength={2}
+                    <select
+                      className="field"
                       value={data.state}
-                      onChange={(e) =>
-                        patch({ state: e.target.value.toUpperCase() })
-                      }
-                      placeholder="GA"
-                    />
+                      onChange={(e) => patch({ state: e.target.value })}
+                    >
+                      {US_STATES.map((s) => (
+                        <option key={s.code} value={s.code}>
+                          {s.code}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-[12px] font-semibold text-[var(--ink-2)]">
@@ -241,6 +250,7 @@ export function SelfEngineeredFlow() {
                       value={data.zip}
                       onChange={(e) => patch({ zip: e.target.value })}
                       placeholder="31406"
+                      inputMode="numeric"
                     />
                   </label>
                 </div>
@@ -289,6 +299,7 @@ export function SelfEngineeredFlow() {
                       className="field"
                       type="number"
                       min={0}
+                      list="se-bills"
                       value={data.monthlyBill ?? ""}
                       onChange={(e) =>
                         patch({
@@ -300,6 +311,11 @@ export function SelfEngineeredFlow() {
                       placeholder="218"
                       autoFocus
                     />
+                    <datalist id="se-bills">
+                      {BILL_PRESETS.map((b) => (
+                        <option key={b} value={b} />
+                      ))}
+                    </datalist>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-[12px] font-semibold text-[var(--ink-2)]">
