@@ -13,6 +13,12 @@ import {
   sizeSystemForSite,
   type SolarResource,
 } from "./solar-resource";
+import {
+  CATALOG_BATTERIES,
+  CATALOG_INVERTERS,
+  CATALOG_MODULES,
+  CATALOG_RACKING,
+} from "./materials-catalog";
 
 export type WizardInput = {
   firstName: string;
@@ -32,6 +38,11 @@ export type WizardInput = {
   repPhone?: string;
   repEmail?: string;
   companyName?: string;
+  /** Materials catalog IDs (from dropdowns) */
+  moduleCatalogId?: string;
+  inverterCatalogId?: string;
+  batteryCatalogId?: string;
+  rackingCatalogId?: string;
 };
 
 export const UTILITIES = [
@@ -85,12 +96,31 @@ function buildSystem(
     utilityName: input.utilityName,
   });
 
+  // Resolve equipment from materials catalog (dropdowns)
+  const modCat =
+    CATALOG_MODULES.find((m) => m.id === input.moduleCatalogId) ||
+    CATALOG_MODULES.find((m) => m.id === "rec-alpha-pure-400") ||
+    CATALOG_MODULES[0];
+  const invCat =
+    CATALOG_INVERTERS.find((m) => m.id === input.inverterCatalogId) ||
+    CATALOG_INVERTERS.find((m) => m.id === "enphase-iq8plus") ||
+    CATALOG_INVERTERS[0];
+  const batCat =
+    CATALOG_BATTERIES.find((m) => m.id === input.batteryCatalogId) ||
+    (input.includeBattery
+      ? CATALOG_BATTERIES.find((m) => m.id === "tesla-powerwall-3")
+      : CATALOG_BATTERIES.find((m) => m.id === "none"));
+  const rackCat =
+    CATALOG_RACKING.find((m) => m.id === input.rackingCatalogId) ||
+    CATALOG_RACKING[0];
+
+  const moduleWatts = modCat?.pmax_w || MODULE_WATTS;
   const siteYield = resource?.specificYieldKwhPerKw ?? DEFAULT_YIELD;
   const { kwStc, panelCount, annualProduction } = sizeSystemForSite(
     usage.annualKwh,
     input.offsetTarget,
     siteYield,
-    MODULE_WATTS
+    moduleWatts
   );
   const offsetPercent = Math.min(
     110,
@@ -98,10 +128,14 @@ function buildSystem(
   );
 
   getRatePlan(input.utilityName); // validate plan exists for utility
-  const batteryOn = input.includeBattery;
-  const batteryAdder = batteryOn ? 13500 : 0;
-  const batteryKwh = batteryOn ? 13.5 : undefined;
+  const batteryOn = Boolean(
+    input.includeBattery && batCat && batCat.usable_kwh > 0 && batCat.id !== "none"
+  );
+  const batteryKwh = batteryOn && batCat ? batCat.usable_kwh : undefined;
+  const batteryAdder =
+    batteryOn && batteryKwh ? Math.round(13500 * (batteryKwh / 13.5)) : 0;
   const systemPrice = Math.round(kwStc * 1000 * PRICE_PER_WATT + batteryAdder);
+  const isMicro = invCat?.topology === "micro";
   const federalTaxCredit = Math.round(systemPrice * ITC_RATE);
   const netPrice = systemPrice - federalTaxCredit;
 
@@ -212,18 +246,22 @@ function buildSystem(
     ],
     hardware: {
       modules: {
-        code: "REC Alpha Pure 400",
-        manufacturer: "REC",
-        watts: MODULE_WATTS,
+        code: modCat?.model || "PV Module",
+        manufacturer: modCat?.manufacturer || "Tier-1",
+        watts: moduleWatts,
         quantity: panelCount,
       },
       inverter: {
-        code: "Enphase IQ8+",
-        manufacturer: "Enphase",
-        quantity: panelCount,
+        code: invCat?.model || "Inverter",
+        manufacturer: invCat?.manufacturer || "OEM",
+        quantity: isMicro ? panelCount : 1,
       },
       battery: batteryOn
-        ? { code: "Tesla Powerwall 3", kwh: batteryKwh!, quantity: 1 }
+        ? {
+            code: batCat!.model,
+            kwh: batteryKwh!,
+            quantity: 1,
+          }
         : undefined,
     },
     production: {
@@ -303,7 +341,9 @@ function buildSystem(
         description: "Lowest entry. Designed to stay under your current utility bill.",
       },
     ],
-    panelPlacementSummary: `${panelCount} × REC Alpha Pure 400`,
+    panelPlacementSummary: `${panelCount} × ${modCat?.model || "module"}${
+      rackCat ? ` · ${rackCat.label}` : ""
+    }`,
     orientationSummary:
       swPanels > 0
         ? `${southPanels} south · ${swPanels} southwest @ 22°`

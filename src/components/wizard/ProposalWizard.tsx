@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -24,6 +24,11 @@ import { useProjects } from "@/lib/store";
 import { SOLAR_MEDIA } from "@/lib/media";
 import { currency, number } from "@/lib/format";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import {
+  EMBEDDED_CATALOG,
+  loadMaterialsCatalog,
+  type MaterialsCatalog,
+} from "@/lib/materials-catalog";
 
 const STEPS = [
   { id: "contact", label: "Homeowner", icon: User },
@@ -53,6 +58,10 @@ const empty: WizardInput = {
   repPhone: "(912) 555-8801",
   repEmail: "jordan@lumensolar.example",
   companyName: "Lumen Solar",
+  moduleCatalogId: "rec-alpha-pure-400",
+  inverterCatalogId: "enphase-iq8plus",
+  batteryCatalogId: "none",
+  rackingCatalogId: "ironridge-xr100-ff2",
 };
 
 export function ProposalWizard() {
@@ -62,6 +71,11 @@ export function ProposalWizard() {
   const [data, setData] = useState<WizardInput>(empty);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [catalog, setCatalog] = useState<MaterialsCatalog>(EMBEDDED_CATALOG);
+
+  useEffect(() => {
+    void loadMaterialsCatalog().then(setCatalog);
+  }, []);
 
   const stepId: StepId = STEPS[step].id;
   const progress = ((step + 1) / STEPS.length) * 100;
@@ -371,11 +385,86 @@ export function ProposalWizard() {
 
           {stepId === "goals" && (
             <StepShell
-              eyebrow="System goals"
-              title="How aggressive should we size?"
-              sub="Most homeowners target ~95% offset. Battery is optional backup."
+              eyebrow="System goals · materials"
+              title="Equipment from the approved list"
+              sub="Pick modules, inverter, battery, and racking from the materials catalog — same list Plan Set Builder uses."
             >
-              <div className="space-y-6">
+              <div className="space-y-5">
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[var(--ink-2)]">
+                    PV module
+                  </span>
+                  <select
+                    className="field"
+                    value={data.moduleCatalogId || ""}
+                    onChange={(e) => patch({ moduleCatalogId: e.target.value })}
+                  >
+                    {(catalog.modules || []).map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label} · {m.pmax_w}W
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[var(--ink-2)]">
+                    Inverter
+                  </span>
+                  <select
+                    className="field"
+                    value={data.inverterCatalogId || ""}
+                    onChange={(e) => patch({ inverterCatalogId: e.target.value })}
+                  >
+                    {(catalog.inverters || []).map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label}
+                        {m.topology === "micro" ? " · micro" : ""}
+                        {m.topology === "hybrid" ? " · hybrid" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[var(--ink-2)]">
+                    Battery / ESS
+                  </span>
+                  <select
+                    className="field"
+                    value={data.batteryCatalogId || "none"}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const bat = (catalog.batteries || []).find((b) => b.id === id);
+                      patch({
+                        batteryCatalogId: id,
+                        includeBattery: Boolean(bat && bat.usable_kwh > 0 && id !== "none"),
+                      });
+                    }}
+                  >
+                    {(catalog.batteries || []).map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label}
+                        {m.usable_kwh > 0 ? ` · ${m.usable_kwh} kWh` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[var(--ink-2)]">
+                    Racking
+                  </span>
+                  <select
+                    className="field"
+                    value={data.rackingCatalogId || ""}
+                    onChange={(e) => patch({ rackingCatalogId: e.target.value })}
+                  >
+                    {(catalog.racking || []).map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
                 <div>
                   <div className="mb-2 flex justify-between text-[13px]">
                     <span className="font-medium text-[var(--ink-2)]">
@@ -402,43 +491,6 @@ export function ProposalWizard() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => patch({ includeBattery: !data.includeBattery })}
-                  className={`flex w-full items-center gap-4 rounded-2xl border p-5 text-left transition ${
-                    data.includeBattery
-                      ? "border-[var(--gold)]/40 bg-[var(--gold-soft)]"
-                      : "border-[var(--line)] bg-black/15 hover:border-white/15"
-                  }`}
-                >
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                      data.includeBattery
-                        ? "bg-[var(--gold)] text-[#1a1508]"
-                        : "bg-white/5 text-[var(--muted)]"
-                    }`}
-                  >
-                    <Battery className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[15px] font-semibold text-[var(--ink)]">
-                      Include home battery
-                    </div>
-                    <div className="text-[13px] text-[var(--muted)]">
-                      Backup power + higher ITC basis · adds ~$13.5k before incentives
-                    </div>
-                  </div>
-                  <div
-                    className={`flex h-6 w-6 items-center justify-center rounded-full border ${
-                      data.includeBattery
-                        ? "border-[var(--gold)] bg-[var(--gold)] text-[#1a1508]"
-                        : "border-white/20"
-                    }`}
-                  >
-                    {data.includeBattery && <Check className="h-3.5 w-3.5" />}
-                  </div>
-                </button>
-
                 {preview && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3 rounded-2xl border border-[var(--line)] bg-black/20 p-4 sm:grid-cols-4">
@@ -452,8 +504,8 @@ export function ProposalWizard() {
                         )}
                       />
                       <MiniStat
-                        label="New utility"
-                        value={currency(preview.bills.proposedMonthly)}
+                        label="Module"
+                        value={preview.hardware.modules?.code?.slice(0, 14) || "—"}
                       />
                     </div>
                     <div
@@ -465,7 +517,7 @@ export function ProposalWizard() {
                     >
                       {preview.bills.pencils
                         ? `✓ Pencils: loan + new bill ≈ ${currency(preview.bills.combinedMonthly)}/mo vs ${currency(preview.bills.currentMonthly)} today`
-                        : `Combined path ≈ ${currency(preview.bills.combinedMonthly)}/mo — adjust offset or enable battery for Overnight Advantage.`}
+                        : `Combined path ≈ ${currency(preview.bills.combinedMonthly)}/mo — adjust offset or battery.`}
                       {data.utilityName.includes("Georgia") && data.includeBattery
                         ? " · Overnight Advantage: charge 11pm–7am @ ~2¢."
                         : ""}
