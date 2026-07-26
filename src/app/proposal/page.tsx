@@ -52,7 +52,7 @@ function ProposalViewInner() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-200/80 print:bg-white">
+    <div className="min-h-screen bg-[var(--prop-shell)] print:bg-white">
       <ProposalToolbar
         customerName={resolved.primaryContact.fullName}
         projectId={resolved.id}

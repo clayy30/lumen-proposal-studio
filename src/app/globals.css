@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-:root {
-  /* App shell — deep charcoal, Enerflo/Apple calm */
+/* ─── Dark (default) ─── */
+:root,
+html[data-theme="dark"] {
   --bg: #0b0c0b;
   --surface: #121412;
   --surface-2: #181a18;
@@ -9,16 +10,49 @@
   --ink-2: #c4c3bc;
   --muted: #7e807a;
   --line: rgba(255, 255, 255, 0.06);
-  --line-strong: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.12);
   --gold: #c9a227;
-  --gold-soft: rgba(201, 162, 39, 0.12);
+  --gold-soft: rgba(201, 162, 39, 0.14);
   --green: #3d9a6a;
+  --hover: rgba(255, 255, 255, 0.04);
+  --field-bg: rgba(0, 0, 0, 0.28);
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --scrollbar: rgba(255, 255, 255, 0.12);
 
-  /* Customer proposal — warm paper */
+  /* Customer proposal sheet */
   --prop-bg: #faf9f6;
   --prop-ink: #141512;
   --prop-muted: #6b6963;
   --prop-accent: #1e3a5f;
+  --prop-card: #ffffff;
+  --prop-shell: #d4d2cc;
+}
+
+/* ─── Light ─── */
+html[data-theme="light"] {
+  --bg: #f4f2ec;
+  --surface: #ffffff;
+  --surface-2: #f0eee7;
+  --ink: #141512;
+  --ink-2: #3d3c38;
+  --muted: #7a7870;
+  --line: rgba(20, 21, 18, 0.08);
+  --line-strong: rgba(20, 21, 18, 0.14);
+  --gold: #a8861a;
+  --gold-soft: rgba(168, 134, 26, 0.12);
+  --green: #2d7a52;
+  --hover: rgba(20, 21, 18, 0.04);
+  --field-bg: rgba(255, 255, 255, 0.9);
+  --shadow: 0 16px 48px rgba(20, 21, 18, 0.08);
+  --scrollbar: rgba(20, 21, 18, 0.15);
+
+  /* Proposal stays paper-like; shell around it is lighter gray */
+  --prop-bg: #faf9f6;
+  --prop-ink: #141512;
+  --prop-muted: #6b6963;
+  --prop-accent: #1e3a5f;
+  --prop-card: #ffffff;
+  --prop-shell: #e8e6df;
 }
 
 @theme inline {
@@ -44,6 +78,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.15s ease;
 }
 
 .font-display {
@@ -58,8 +93,14 @@ body {
 
 .proposal-doc {
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.04),
-    0 24px 80px rgba(0, 0, 0, 0.12);
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    var(--shadow);
+}
+
+html[data-theme="light"] .proposal-doc {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 12px 40px rgba(20, 21, 18, 0.1);
 }
 
 /* Scrollbars */
@@ -71,14 +112,14 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--scrollbar);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.16);
+  opacity: 0.9;
 }
 
-/* Print / Save as PDF — guaranteed fallback */
+/* Print / Save as PDF — always light paper */
 @media print {
   @page {
     size: letter;
@@ -95,11 +136,6 @@ body {
 
   .no-print {
     display: none !important;
-  }
-
-  /* Hide app chrome around proposal */
-  body > * {
-    /* proposal is full-bleed on its route */
   }
 
   .proposal-doc {
@@ -121,7 +157,6 @@ body {
     page-break-after: auto;
   }
 
-  /* Avoid cutting charts / cards mid-box */
   .pdf-page img,
   .pdf-page svg,
   .pdf-page canvas {
@@ -130,7 +165,6 @@ body {
   }
 }
 
-/* Subtle entrance */
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -148,17 +182,17 @@ body {
   animation: fade-up 0.5s ease 0.08s both;
 }
 
-/* Wizard form fields */
+/* Wizard form fields — theme aware */
 .field {
   width: 100%;
   border-radius: 12px;
   border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--field-bg);
   padding: 12px 14px;
   font-size: 15px;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 .field:focus {
   border-color: rgba(201, 162, 39, 0.55);
@@ -176,4 +210,9 @@ select.field {
     calc(100% - 13px) calc(50% - 3px);
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
+}
+
+/* Theme-aware hover utility used in shell */
+.hover-surface:hover {
+  background: var(--hover);
 }

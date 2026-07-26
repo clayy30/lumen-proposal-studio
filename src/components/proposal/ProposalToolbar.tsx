@@ -11,6 +11,7 @@ import {
   Check,
 } from "lucide-react";
 import { exportProposalPdf } from "@/lib/pdf-export";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function ProposalToolbar({
   customerName,
@@ -102,21 +103,21 @@ export function ProposalToolbar({
   }
 
   return (
-    <div className="no-print sticky top-0 z-50 border-b border-black/5 bg-[var(--prop-bg)]/95 backdrop-blur-xl">
+    <div className="no-print sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--surface)]/95 text-[var(--ink)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-[900px] items-center justify-between gap-3 px-4 py-3 sm:px-0">
         <Link
           href="/projects"
-          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-neutral-500 transition hover:bg-black/[0.04] hover:text-neutral-800"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-[var(--muted)] transition hover:bg-[var(--hover)] hover:text-[var(--ink)]"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Projects</span>
         </Link>
 
         <div className="min-w-0 flex-1 text-center">
-          <div className="truncate text-[13px] font-semibold text-neutral-800">
+          <div className="truncate text-[13px] font-semibold text-[var(--ink)]">
             {customerName}
           </div>
-          <div className="text-[11px] text-neutral-400">
+          <div className="text-[11px] text-[var(--muted)]">
             {exporting
               ? progress || "Exporting PDF…"
               : success
@@ -126,11 +127,12 @@ export function ProposalToolbar({
         </div>
 
         <div className="flex items-center gap-1.5">
+          <ThemeToggle compact className="text-[var(--muted)] hover:bg-[var(--hover)]" />
           <button
             type="button"
             onClick={handleShare}
             disabled={exporting}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-medium text-neutral-600 transition hover:bg-black/[0.04] disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-medium text-[var(--muted)] transition hover:bg-[var(--hover)] hover:text-[var(--ink)] disabled:opacity-50"
           >
             {copied ? (
               <Check className="h-4 w-4 text-emerald-600" />
@@ -143,7 +145,7 @@ export function ProposalToolbar({
             type="button"
             onClick={handlePrint}
             disabled={exporting}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-medium text-neutral-600 transition hover:bg-black/[0.04] disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-medium text-[var(--muted)] transition hover:bg-[var(--hover)] hover:text-[var(--ink)] disabled:opacity-50"
             title="Print or Save as PDF from the system dialog"
           >
             <Printer className="h-4 w-4" />
@@ -153,7 +155,7 @@ export function ProposalToolbar({
             type="button"
             onClick={() => void handlePdf()}
             disabled={exporting}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[var(--prop-ink)] px-3.5 text-[12.5px] font-semibold text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-60"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[var(--ink)] px-3.5 text-[12.5px] font-semibold text-[var(--bg)] shadow-sm transition hover:opacity-90 disabled:opacity-60"
           >
             {exporting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

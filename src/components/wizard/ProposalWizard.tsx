@@ -23,6 +23,7 @@ import {
 import { useProjects } from "@/lib/store";
 import { SOLAR_MEDIA } from "@/lib/media";
 import { currency, number } from "@/lib/format";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const STEPS = [
   { id: "contact", label: "Homeowner", icon: User },
@@ -140,6 +141,9 @@ export function ProposalWizard() {
       </div>
 
       <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col px-5 py-8 sm:px-8">
+        <div className="absolute right-5 top-6 z-10 sm:right-8">
+          <ThemeToggle compact className="rounded-full border border-[var(--line)] bg-[var(--surface)]/80 px-3 text-[var(--ink)] backdrop-blur" />
+        </div>
         {/* Progress */}
         <div className="mb-8">
           <div className="mb-3 flex items-center justify-between text-[12px] text-[var(--muted)]">

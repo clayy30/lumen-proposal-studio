@@ -8,11 +8,11 @@ import {
   Upload,
   FileText,
   Sun,
-  Settings,
   Sparkles,
   PlusCircle,
 } from "lucide-react";
 import { cn } from "@/lib/format";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13.5px] font-medium transition-all duration-150",
                   active
                     ? "bg-[var(--gold-soft)] text-[var(--gold)]"
-                    : "text-[var(--ink-2)] hover:bg-white/[0.04] hover:text-[var(--ink)]"
+                    : "text-[var(--ink-2)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
                 )}
               >
                 <Icon
@@ -100,14 +100,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        <div className="border-t border-[var(--line)] px-4 py-4">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-[12.5px] text-[var(--muted)] transition hover:bg-white/[0.04] hover:text-[var(--ink-2)]"
-          >
-            <Settings className="h-4 w-4" strokeWidth={1.75} />
-            Workspace settings
-          </button>
+        <div className="border-t border-[var(--line)] px-4 py-3">
+          <ThemeToggle />
         </div>
       </aside>
 
