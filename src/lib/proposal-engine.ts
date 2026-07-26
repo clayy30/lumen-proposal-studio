@@ -7,6 +7,12 @@ import type {
   TeamMember,
 } from "./types";
 import { computeCashFlow, computeRealRate, getRatePlan } from "./rates";
+import {
+  fetchSolarResource,
+  monthlyProductionFromResource,
+  sizeSystemForSite,
+  type SolarResource,
+} from "./solar-resource";
 
 export type WizardInput = {
   firstName: string;
@@ -65,33 +71,26 @@ function amortize(principal: number, apr: number, years: number): number {
   return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 }
 
-function sizeSystem(
-  annualKwh: number,
-  offsetTarget: number
-): { kwStc: number; panelCount: number; annualProduction: number } {
-  const targetProduction = annualKwh * offsetTarget;
-  let kwStc = targetProduction / DEFAULT_YIELD;
-  let panelCount = Math.max(8, Math.ceil((kwStc * 1000) / MODULE_WATTS));
-  if (panelCount % 2 === 1) panelCount += 1;
-  kwStc = (panelCount * MODULE_WATTS) / 1000;
-  const annualProduction = Math.round(kwStc * DEFAULT_YIELD);
-  return { kwStc, panelCount, annualProduction };
-}
-
-function monthlyProduction(annual: number): number[] {
+function monthlyProductionGeneric(annual: number): number[] {
   return MONTHLY_SHAPE.map((s) => Math.round(annual * s));
 }
 
-function buildSystem(input: WizardInput): SystemDesign {
+function buildSystem(
+  input: WizardInput,
+  resource?: SolarResource | null
+): SystemDesign {
   const usage = computeRealRate({
     monthlyBill: input.monthlyBill,
     annualKwh: input.annualKwh,
     utilityName: input.utilityName,
   });
 
-  const { kwStc, panelCount, annualProduction } = sizeSystem(
+  const siteYield = resource?.specificYieldKwhPerKw ?? DEFAULT_YIELD;
+  const { kwStc, panelCount, annualProduction } = sizeSystemForSite(
     usage.annualKwh,
-    input.offsetTarget
+    input.offsetTarget,
+    siteYield,
+    MODULE_WATTS
   );
   const offsetPercent = Math.min(
     110,
@@ -229,10 +228,16 @@ function buildSystem(input: WizardInput): SystemDesign {
     },
     production: {
       annualKwh: annualProduction,
-      monthlyKwh: monthlyProduction(annualProduction),
+      monthlyKwh: resource
+        ? monthlyProductionFromResource(annualProduction, resource)
+        : monthlyProductionGeneric(annualProduction),
       offsetPercent,
       consumptionAnnualKwh: usage.annualKwh,
-      specificYield: DEFAULT_YIELD,
+      specificYield: siteYield,
+      peakSunHours: resource?.peakSunHoursAnnual,
+      peakSunHoursMonthly: resource?.peakSunHoursMonthly,
+      solarResourceSource: resource?.source,
+      solarResourceSummary: resource?.summary,
     },
     financials: {
       systemPrice,
@@ -334,9 +339,10 @@ export async function geocodeAddress(
 
 export function buildProposalFromWizard(
   input: WizardInput,
-  coords?: { lat: number; lon: number } | null
+  coords?: { lat: number; lon: number } | null,
+  resource?: SolarResource | null
 ): ProposalProject {
-  const system = buildSystem(input);
+  const system = buildSystem(input, resource);
   const usage = computeRealRate({
     monthlyBill: input.monthlyBill,
     annualKwh: input.annualKwh,
@@ -359,8 +365,8 @@ export function buildProposalFromWizard(
     state: input.state,
     zip: input.zip,
     country: "US",
-    lat: coords?.lat,
-    lon: coords?.lon,
+    lat: coords?.lat ?? resource?.lat,
+    lon: coords?.lon ?? resource?.lon,
     lines: [
       input.street,
       `${input.city}, ${input.state} ${input.zip}`.replace(/,\s*$/, ""),
@@ -373,7 +379,7 @@ export function buildProposalFromWizard(
     phone: input.repPhone || "(912) 555-8800",
     website: "https://lumensolar.example",
     about:
-      "Premium residential solar. Real-rate bill math, Georgia Power plan strategy, financing that pencils.",
+      "Premium residential solar. Site-specific sun hours, real-rate bill math, financing that pencils.",
     highlightColor: "#C9A227",
   };
 
@@ -392,6 +398,10 @@ export function buildProposalFromWizard(
   const first = input.firstName || "there";
   const loan = system.paymentOptions.find((p) => p.type === "loan");
   const rateC = ((system.bills.realRatePerKwh ?? 0.15) * 100).toFixed(1);
+  const psh = resource?.peakSunHoursAnnual;
+  const sunLine = psh
+    ? ` At ${address.city || "your address"}, NASA climate data shows about ${psh.toFixed(1)} peak sun hours/day (~${(resource?.specificYieldKwhPerKw ?? 0).toLocaleString()} kWh per kW per year) — production is modeled for your location, not a generic template.`
+    : "";
 
   return {
     id: uid("proj"),
@@ -406,16 +416,60 @@ export function buildProposalFromWizard(
     systems: [system],
     selectedSystemId: system.id,
     assignedRep: rep,
-    proposalMessage: `${first}, your all-in ${input.utilityName} rate is about ${rateC}¢/kWh (bill ÷ kWh, including fees & tax). We sized a ${system.kwStc.toFixed(2)} kW system${system.hasBattery ? " with battery" : ""} so your solar payment + new power bill stays at or under today's $${system.bills.currentMonthly.toFixed(0)}/mo utility bill${system.bills.pencils ? " — this path pencils." : "."}`,
+    proposalMessage: `${first}, your all-in ${input.utilityName} rate is about ${rateC}¢/kWh (bill ÷ kWh, including fees & tax). We sized a ${system.kwStc.toFixed(2)} kW system${system.hasBattery ? " with battery" : ""} so your solar payment + new power bill stays at or under today's $${system.bills.currentMonthly.toFixed(0)}/mo utility bill${system.bills.pencils ? " — this path pencils." : "."}${sunLine}`,
     source: "manual",
-    tags: ["wizard", input.utilityName, system.bills.pencils ? "pencils" : "review"],
+    tags: [
+      "wizard",
+      input.utilityName,
+      system.bills.pencils ? "pencils" : "review",
+      resource ? "site-irradiance" : "regional-irradiance",
+    ],
     notes: [
       `Real rate $${(system.bills.realRatePerKwh ?? 0).toFixed(4)}/kWh · ${system.bills.rateMethod}`,
+      resource
+        ? `Solar resource: ${resource.peakSunHoursAnnual.toFixed(2)} PSH/day · ${resource.specificYieldKwhPerKw} kWh/kW/yr · ${resource.source}`
+        : "Solar resource: default regional yield (no coordinates)",
       `Combined $${system.bills.combinedMonthly?.toFixed(0)}/mo (loan $${loan?.monthlyPayment?.toFixed(0)} + utility $${system.bills.proposedMonthly.toFixed(0)}) vs current $${system.bills.currentMonthly.toFixed(0)}`,
       ...(system.bills.ratePlanNotes ?? []),
     ].join("\n"),
+    solarResource: resource
+      ? {
+          lat: resource.lat,
+          lon: resource.lon,
+          peakSunHoursAnnual: resource.peakSunHoursAnnual,
+          peakSunHoursMonthly: resource.peakSunHoursMonthly,
+          specificYieldKwhPerKw: resource.specificYieldKwhPerKw,
+          source: resource.source,
+          summary: resource.summary,
+        }
+      : undefined,
   };
+}
+
+/**
+ * Full personalized build: geocode address → NASA POWER sun hours → proposal.
+ * Use this for final generate (rep wizard + Self-Engineered).
+ */
+export async function buildPersonalizedProposal(
+  input: WizardInput,
+  coordsIn?: { lat: number; lon: number } | null
+): Promise<ProposalProject> {
+  let coords = coordsIn ?? null;
+  if (!coords?.lat || !coords?.lon) {
+    coords = await geocodeAddress(
+      input.street,
+      input.city,
+      input.state,
+      input.zip
+    );
+  }
+  let resource: SolarResource | null = null;
+  if (coords?.lat != null && coords?.lon != null) {
+    resource = await fetchSolarResource(coords.lat, coords.lon);
+  }
+  return buildProposalFromWizard(input, coords, resource);
 }
 
 // Re-export for wizard live preview
 export { computeRealRate, computeCashFlow, getRatePlan } from "./rates";
+export { fetchSolarResource } from "./solar-resource";

@@ -126,6 +126,25 @@ export interface ProductionData {
   specificYield?: number;
   offsetPercent?: number;
   consumptionAnnualKwh?: number;
+  /** Site peak sun hours (kWh/m²/day annual avg) */
+  peakSunHours?: number;
+  /** Monthly peak sun hours JAN–DEC */
+  peakSunHoursMonthly?: number[];
+  /** e.g. NASA POWER climatology */
+  solarResourceSource?: string;
+  /** Homeowner-facing one-liner */
+  solarResourceSummary?: string;
+}
+
+/** Site solar resource attached at project level for personalization */
+export interface SiteSolarResource {
+  lat: number;
+  lon: number;
+  peakSunHoursAnnual: number;
+  peakSunHoursMonthly: number[];
+  specificYieldKwhPerKw: number;
+  source: string;
+  summary: string;
 }
 
 export interface SystemDesign {
@@ -174,6 +193,8 @@ export interface ProposalProject {
   source: "opensolar" | "manual" | "sample";
   notes?: string;
   tags?: string[];
+  /** NASA POWER (or fallback) resource for this address */
+  solarResource?: SiteSolarResource;
 }
 
 export interface DashboardStats {

@@ -17,7 +17,7 @@ import {
 import {
   UTILITIES,
   buildProposalFromWizard,
-  geocodeAddress,
+  buildPersonalizedProposal,
   type WizardInput,
 } from "@/lib/proposal-engine";
 import { useProjects } from "@/lib/store";
@@ -94,21 +94,12 @@ export function SelfEngineeredFlow() {
     setBusy(true);
     setError(null);
     try {
-      const coords = await geocodeAddress(
-        data.street,
-        data.city,
-        data.state,
-        data.zip
-      );
-      const project = buildProposalFromWizard(
-        {
-          ...data,
-          repName: "Self-Engineered (web)",
-          companyName: data.companyName || "Lumen Solar",
-        },
-        coords
-      );
-      // Mark as homeowner inbound lead
+      // Address → sun hours (NASA POWER) → site-specific production
+      const project = await buildPersonalizedProposal({
+        ...data,
+        repName: "Self-Engineered (web)",
+        companyName: data.companyName || "Lumen Solar",
+      });
       project.source = "manual";
       project.tags = [
         ...(project.tags ?? []),
@@ -485,9 +476,17 @@ export function SelfEngineeredFlow() {
                   sub="all-in / kWh"
                 />
                 <ResultTile
-                  label="Today's bill"
-                  value={currency(sys.bills.currentMonthly)}
-                  sub="/ month"
+                  label="Peak sun hours"
+                  value={
+                    sys.production.peakSunHours != null
+                      ? `${sys.production.peakSunHours.toFixed(1)}`
+                      : "—"
+                  }
+                  sub={
+                    sys.production.specificYield
+                      ? `hrs/day · ~${sys.production.specificYield} kWh/kW/yr`
+                      : "at your address"
+                  }
                 />
                 <ResultTile
                   label="Est. solar path"
@@ -500,6 +499,14 @@ export function SelfEngineeredFlow() {
                   highlight
                 />
               </div>
+              {sys.production.solarResourceSummary && (
+                <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]">
+                  ☀ {sys.production.solarResourceSummary}
+                  {sys.production.solarResourceSource
+                    ? ` · ${sys.production.solarResourceSource}`
+                    : ""}
+                </p>
+              )}
 
               {sys.bills.pencils && (
                 <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5 text-[12.5px] text-emerald-200">

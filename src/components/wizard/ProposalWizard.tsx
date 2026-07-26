@@ -17,7 +17,7 @@ import {
 import {
   UTILITIES,
   buildProposalFromWizard,
-  geocodeAddress,
+  buildPersonalizedProposal,
   type WizardInput,
 } from "@/lib/proposal-engine";
 import { useProjects } from "@/lib/store";
@@ -112,13 +112,8 @@ export function ProposalWizard() {
     setBusy(true);
     setError(null);
     try {
-      const coords = await geocodeAddress(
-        data.street,
-        data.city,
-        data.state,
-        data.zip
-      );
-      const project = buildProposalFromWizard(data, coords);
+      // Geocode + NASA POWER site irradiance → personalized production
+      const project = await buildPersonalizedProposal(data);
       upsertProjects([project], "merge");
       router.push(`/proposal/?id=${project.id}`);
     } catch (e) {

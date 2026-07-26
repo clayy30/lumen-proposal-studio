@@ -190,13 +190,75 @@ export function ProposalDocument({
 
       {/* ═══════════════ 2. YOUR SITUATION ═══════════════ */}
       <section data-pdf-page className="pdf-page px-10 py-12 sm:px-12">
-        <SectionEyebrow>Your home · your bill</SectionEyebrow>
+        <SectionEyebrow>Your home · your sun · your bill</SectionEyebrow>
         <h2 className="font-display mt-2 text-[1.85rem] font-semibold tracking-tight">
-          Built around how you use power
+          Built for this address — not a template
         </h2>
         <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-[var(--prop-muted)]">
           {project.proposalMessage}
         </p>
+
+        {/* Site-specific solar resource callout */}
+        {(system.production.peakSunHours != null ||
+          project.solarResource ||
+          project.address.lat != null) && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-[#c9a227]/30 bg-gradient-to-br from-[#fbf6e9] via-white to-[#f0f4f8] p-5 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#a88620]">
+                  Solar resource at your property
+                </div>
+                <p className="mt-1.5 text-[14px] font-semibold text-[var(--prop-ink)]">
+                  {project.address.street}
+                  {project.address.city
+                    ? ` · ${project.address.city}, ${project.address.state}`
+                    : ""}
+                </p>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--prop-muted)]">
+                  {system.production.solarResourceSummary ??
+                    project.solarResource?.summary ??
+                    "Site irradiance used to size annual production."}
+                </p>
+                {(system.production.solarResourceSource ||
+                  project.solarResource?.source) && (
+                  <p className="mt-2 text-[11px] text-[var(--prop-muted)]">
+                    Source:{" "}
+                    {system.production.solarResourceSource ??
+                      project.solarResource?.source}
+                    {project.address.lat != null && project.address.lon != null
+                      ? ` · ${project.address.lat.toFixed(4)}°, ${project.address.lon.toFixed(4)}°`
+                      : ""}
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:min-w-[200px]">
+                <div className="rounded-xl bg-white/90 px-3 py-2.5 ring-1 ring-black/5">
+                  <div className="text-[9px] font-semibold uppercase tracking-wider text-[var(--prop-muted)]">
+                    Peak sun hrs/day
+                  </div>
+                  <div className="font-display text-xl font-semibold text-[var(--prop-ink)]">
+                    {(
+                      system.production.peakSunHours ??
+                      project.solarResource?.peakSunHoursAnnual ??
+                      0
+                    ).toFixed(1)}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-white/90 px-3 py-2.5 ring-1 ring-black/5">
+                  <div className="text-[9px] font-semibold uppercase tracking-wider text-[var(--prop-muted)]">
+                    Yield kWh/kW/yr
+                  </div>
+                  <div className="font-display text-xl font-semibold text-[var(--prop-ink)]">
+                    {number(
+                      system.production.specificYield ??
+                        project.solarResource?.specificYieldKwhPerKw
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className="relative overflow-hidden rounded-2xl">

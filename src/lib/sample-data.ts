@@ -55,9 +55,20 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
       scheduleLabel: "Book a design review",
     },
     proposalMessage:
-      "Your home is an excellent solar candidate. We've designed a system that covers nearly all of your annual usage while preserving roof aesthetics — clean layout, premium hardware, and financing that can lower your monthly energy cost from day one.",
+      "Your home is an excellent solar candidate. Production is modeled from NASA climate data at your coordinates (~4.7 peak sun hours/day) — not a national average template — sized to cover nearly all of your annual usage with financing that can lower monthly energy cost from day one.",
     source: "sample",
-    tags: ["residential", "priority"],
+    tags: ["residential", "priority", "site-irradiance"],
+    solarResource: {
+      lat: 31.9784,
+      lon: -81.0998,
+      peakSunHoursAnnual: 4.73,
+      peakSunHoursMonthly: [
+        2.98, 3.61, 4.79, 5.95, 6.46, 6.19, 6.21, 5.6, 4.82, 4.11, 3.29, 2.64,
+      ],
+      specificYieldKwhPerKw: 1380,
+      source: "NASA POWER climatology (2001–2020)",
+      summary: "Your site · 4.7 peak sun hours/day avg · ~1,380 kWh/kW/year",
+    },
     systems: [
       {
         id: "sys-a",
@@ -102,6 +113,14 @@ export const SAMPLE_PROJECTS: ProposalProject[] = [
           monthlyKwh: [720, 780, 980, 1180, 1320, 1380, 1420, 1340, 1180, 980, 800, 760],
           offsetPercent: 97,
           consumptionAnnualKwh: 13200,
+          peakSunHours: 4.73,
+          peakSunHoursMonthly: [
+            2.98, 3.61, 4.79, 5.95, 6.46, 6.19, 6.21, 5.6, 4.82, 4.11, 3.29, 2.64,
+          ],
+          specificYield: 1380,
+          solarResourceSource: "NASA POWER climatology (2001–2020)",
+          solarResourceSummary:
+            "Your site · 4.7 peak sun hours/day avg · ~1,380 kWh/kW/year",
         },
         financials: {
           systemPrice: 28800,
