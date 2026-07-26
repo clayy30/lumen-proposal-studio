@@ -64,8 +64,14 @@ export interface HardwareSpec {
   };
   battery?: {
     code: string;
+    manufacturer?: string;
     kwh: number;
     quantity?: number;
+  };
+  racking?: {
+    code?: string;
+    manufacturer?: string;
+    label?: string;
   };
 }
 

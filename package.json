@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "export": "GITHUB_PAGES=true next build"
+    "export": "GITHUB_PAGES=true next build",
+    "verify:docs": "node scripts/verify-equipment-docs.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

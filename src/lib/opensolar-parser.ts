@@ -200,7 +200,13 @@ function mapSystem(raw: Record<string, unknown>, index: number): SystemDesign {
       battery:
         batteries.length > 0
           ? {
-              code: asString(raw.batteryCodes ?? bat0.code ?? bat0.product_code, "Battery"),
+              code: asString(
+                raw.batteryCodes ?? bat0.code ?? bat0.product_code ?? bat0.name,
+                "Battery"
+              ),
+              manufacturer:
+                asString(bat0.manufacturer_name ?? bat0.manufacturer ?? bat0.brand) ||
+                undefined,
               kwh: asNumber(raw.battery_total_kwh ?? bat0.kwh, 0),
               quantity: asNumber(bat0.quantity, 1) || 1,
             }

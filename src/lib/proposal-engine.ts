@@ -246,21 +246,30 @@ function buildSystem(
     ],
     hardware: {
       modules: {
-        code: modCat?.model || "PV Module",
+        // Prefer full label so doc matching sees brand + model (e.g. "EG4 PowerPro…")
+        code: modCat?.label || modCat?.model || "PV Module",
         manufacturer: modCat?.manufacturer || "Tier-1",
         watts: moduleWatts,
         quantity: panelCount,
       },
       inverter: {
-        code: invCat?.model || "Inverter",
+        code: invCat?.label || invCat?.model || "Inverter",
         manufacturer: invCat?.manufacturer || "OEM",
         quantity: isMicro ? panelCount : 1,
       },
       battery: batteryOn
         ? {
-            code: batCat!.model,
+            code: batCat!.label || batCat!.model,
+            manufacturer: batCat!.manufacturer,
             kwh: batteryKwh!,
             quantity: 1,
+          }
+        : undefined,
+      racking: rackCat
+        ? {
+            code: rackCat.id,
+            manufacturer: rackCat.manufacturer,
+            label: rackCat.label,
           }
         : undefined,
     },
